@@ -1,0 +1,33 @@
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django local database
+db.sqlite3
+db.sqlite3-journal
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Local backups
+*.backup
+*.bak
+
+# Large datasets (download and prepare locally)
+dataset/*.csv
+
+# Jupyter checkpoint files
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.venv/

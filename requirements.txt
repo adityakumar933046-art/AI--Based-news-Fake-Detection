@@ -1,4 +1,4 @@
-Django>=5.2,<6.0
+﻿Django>=5.2,<6.0
 pandas
 numpy
 scikit-learn
@@ -8,4 +8,5 @@ matplotlib
 seaborn
 jupyter
 python-dotenv
+requests
 Pillow

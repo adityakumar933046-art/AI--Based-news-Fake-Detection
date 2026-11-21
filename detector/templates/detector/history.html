@@ -1,0 +1,110 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction History</title>
+    <link rel="stylesheet" href="{% static 'detector/css/style.css' %}">
+</head>
+
+<body>
+
+<header>
+    <h1>Fake News Detector</h1>
+    <p>Your Previous News Predictions</p>
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'history' %}">Prediction History</a>
+    </nav>
+</header>
+
+<main>
+<section class="history-container">
+
+    <h2>Prediction History</h2>
+
+    {% if predictions %}
+        <div class="history-list">
+
+            {% for item in predictions %}
+                <article class="history-item">
+
+                    <div class="history-header">
+                        <span class="result-badge {{ item.prediction|lower }}">
+                            {{ item.prediction }}
+                        </span>
+
+                        <span class="history-date">
+                            {{ item.created_at|date:"d M Y, h:i A" }}
+                        </span>
+                    </div>
+
+                    <div class="news-content">
+                        {{ item.news_text|truncatechars:200 }}
+                    </div>
+
+                    <p class="history-confidence">
+                        Model Score: {{ item.confidence|floatformat:2 }}%
+                    </p>
+
+                    <div class="fact-check-history">
+                        <h3>Google Fact Check</h3>
+
+                        {% if item.fact_check_status == "MATCHES_FOUND" %}
+                            <p>
+                                <strong>Status:</strong> Matching reviews found
+                                ({{ item.fact_check_results|length }})
+                            </p>
+
+                            {% for review in item.fact_check_results %}
+                                <div class="news-content">
+                                    <p><strong>Publisher:</strong> {{ review.publisher }}</p>
+                                    <p><strong>Claim:</strong> {{ review.claim }}</p>
+                                    <p><strong>Rating:</strong> {{ review.rating }}</p>
+
+                                    {% if review.url %}
+                                        <a href="{{ review.url }}"
+                                           target="_blank"
+                                           rel="noopener noreferrer">
+                                            Read Original Fact Check
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                        {% elif item.fact_check_status == "NO_MATCHES" %}
+                            <p>No matching fact-check reviews found.</p>
+
+                        {% elif item.fact_check_status == "API_ERROR" %}
+                            <p>Fact-check search failed.</p>
+                            <p>{{ item.fact_check_error }}</p>
+
+                        {% else %}
+                            <p>Fact-check search was not performed.</p>
+                        {% endif %}
+                    </div>
+
+                </article>
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+        <div class="empty-history">
+            <h3>No Predictions Yet</h3>
+            <p>Your prediction history will appear here.</p>
+            <a href="{% url 'home' %}">Analyze Your First News Article</a>
+        </div>
+    {% endif %}
+
+</section>
+</main>
+
+<footer>
+    <p>Fake News Detector | Machine Learning Project</p>
+</footer>
+
+</body>
+</html>
