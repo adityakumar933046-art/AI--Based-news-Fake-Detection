@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from .models import NewsPrediction
 
 
@@ -7,12 +6,19 @@ from .models import NewsPrediction
 class NewsPredictionAdmin(admin.ModelAdmin):
 
     list_display = (
-        'id',
-        'prediction',
-        'confidence',
-        'created_at'
+        "id",
+        "prediction",
+        "confidence",
+        "fact_check_status",
+        "created_at",
     )
 
-    list_filter = ('prediction', 'created_at')
+    list_filter = (
+        "prediction",
+        "fact_check_status",
+        "created_at",
+    )
 
-    search_fields = ('news_text',)
+    search_fields = ("news_text",)
+
+    readonly_fields = ("created_at",)

@@ -1,0 +1,76 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fake News Detector</title>
+
+    <link rel="stylesheet"
+          href="{% static 'detector/css/style.css' %}">
+</head>
+
+<body>
+
+    <header>
+        <h1>Fake News Detector</h1>
+        <p>Analyze news articles using Machine Learning</p>
+
+        <nav>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'history' %}">Prediction History</a>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>Check Your News</h2>
+
+            <p>
+                Paste a news article below to check whether
+                our machine learning model classifies it as
+                Fake or Real.
+            </p>
+
+            {% if error %}
+                <div class="error-message" role="alert">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'predict_news' %}">
+                {% csrf_token %}
+
+                <label for="news">
+                    Enter News Article:
+                </label>
+
+                <textarea
+                    id="news"
+                    name="news"
+                    rows="12"
+                    placeholder="Paste your news article here..."
+                    required
+                ></textarea>
+
+                <button type="submit">
+                    Analyze News
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            Fake News Detector | Machine Learning Project
+        </p>
+        <p>
+            Predictions are model estimates, not verified facts.
+        </p>
+    </footer>
+
+</body>
+</html>
