@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}History - AI News Detector{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Prediction History</h1>
+            <p class="page-subtitle">Historical classification logs stored in the SQLite database.</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openClearModal()">
+                <i class="fa-solid fa-trash-can"></i> Clear History
+            </button>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="card" style="padding: 1.25rem;">
+        <form method="GET" action="{{ url_for('history') }}" class="history-filter-form">
+            <input 
+                type="text" 
+                name="search" 
+                class="search-input" 
+                placeholder="Search news text..."
+                value="{{ search_query }}">
+
+            <select name="filter" class="filter-select">
+                <option value="ALL" {% if current_filter == 'ALL' or not current_filter %}selected{% endif %}>All Predictions</option>
+                <option value="REAL" {% if current_filter == 'REAL' %}selected{% endif %}>Real News</option>
+                <option value="FAKE" {% if current_filter == 'FAKE' %}selected{% endif %}>Fake News</option>
+                <option value="UNCERTAIN" {% if current_filter == 'UNCERTAIN' %}selected{% endif %}>Uncertain</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-filter"></i> Apply
+            </button>
+
+            {% if search_query or (current_filter and current_filter != 'ALL') %}
+                <a href="{{ url_for('history') }}" class="btn btn-outline btn-sm">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- History Data Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-database"></i>
+                <span>Logged Inferences</span>
+            </div>
+            <span class="text-counter">Total: {{ total_records }}</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">ID</th>
+                        <th>News Preview</th>
+                        <th style="width: 120px;">Logistic Reg.</th>
+                        <th style="width: 120px;">Naive Bayes</th>
+                        <th style="width: 120px;">Final Prediction</th>
+                        <th style="width: 150px;">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if records %}
+                        {% for r in records %}
+                            <tr>
+                                <td>#{{ r.id }}</td>
+                                <td title="{{ r.news_text }}">
+                                    {{ r.news_text[:110] }}{% if r.news_text|length > 110 %}...{% endif %}
+                                </td>
+                                <td>{{ r.lr_prediction }}</td>
+                                <td>{{ r.nb_prediction }}</td>
+                                <td>
+                                    <span class="badge-table {% if r.final_prediction == 'REAL' %}table-real{% elif r.final_prediction == 'FAKE' %}table-fake{% else %}table-uncertain{% endif %}">
+                                        {{ r.final_prediction }}
+                                    </span>
+                                </td>
+                                <td class="text-muted" style="font-size: 0.8rem;">{{ r.created_at }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                No prediction history records found.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+            <div class="pagination-wrap">
+                <span class="text-counter">Page {{ current_page }} of {{ total_pages }}</span>
+                <div style="display: flex; gap: 0.5rem;">
+                    {% if current_page > 1 %}
+                        <a href="{{ url_for('history', page=current_page-1, search=search_query, filter=current_filter) }}" class="btn btn-outline btn-sm">
+                            &laquo; Previous
+                        </a>
+                    {% endif %}
+                    {% if current_page < total_pages %}
+                        <a href="{{ url_for('history', page=current_page+1, search=search_query, filter=current_filter) }}" class="btn btn-outline btn-sm">
+                            Next &raquo;
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Clear History Confirmation Modal -->
+<div id="clearHistoryModal" class="modal-overlay hidden">
+    <div class="modal-dialog">
+        <h3 class="modal-title">Clear Prediction History?</h3>
+        <p class="modal-body">
+            Are you sure you want to permanently delete all prediction logs from the SQLite database? This action cannot be undone.
+        </p>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline btn-sm" onclick="closeClearModal()">Cancel</button>
+            <form method="POST" action="{{ url_for('handle_clear_history') }}" style="display:inline;">
+                <button type="submit" class="btn btn-primary btn-sm">Yes, Clear All History</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openClearModal() {
+        document.getElementById('clearHistoryModal').classList.remove('hidden');
+    }
+
+    function closeClearModal() {
+        document.getElementById('clearHistoryModal').classList.add('hidden');
+    }
+</script>
+{% endblock %}

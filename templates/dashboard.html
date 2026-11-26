@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI News Detector{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">System Dashboard</h1>
+            <p class="page-subtitle">Telemetry metrics from SQLite database and model evaluation benchmarks.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('home') }}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-plus"></i> Analyze News
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Statistic Cards (Real Backend Data) -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <span class="kpi-label">Total News Analyzed</span>
+            <div class="kpi-value" id="kpiTotal">{{ stats.total_analyzed }}</div>
+            <span class="kpi-subtext">Logged in SQLite</span>
+        </div>
+
+        <div class="kpi-card">
+            <span class="kpi-label">Real Predictions</span>
+            <div class="kpi-value" id="kpiReal">{{ stats.total_real }}</div>
+            <span class="kpi-subtext">Two-Model Agreement</span>
+        </div>
+
+        <div class="kpi-card">
+            <span class="kpi-label">Fake Predictions</span>
+            <div class="kpi-value" id="kpiFake">{{ stats.total_fake }}</div>
+            <span class="kpi-subtext">Two-Model Agreement</span>
+        </div>
+
+        <div class="kpi-card">
+            <span class="kpi-label">Uncertain Predictions</span>
+            <div class="kpi-value" id="kpiUncertain">{{ stats.total_uncertain }}</div>
+            <span class="kpi-subtext">Split Decision</span>
+        </div>
+    </div>
+
+    <!-- Model Comparison Chart Card (Only #14213D and #FFFFFF) -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Model Evaluation Performance Comparison</span>
+            </div>
+            <span class="text-counter">Unseen Test Set Benchmark</span>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="modelPerformanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Benchmark Metrics Summary Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-table"></i>
+                <span>Model Evaluation Metrics</span>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>Accuracy</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1 Score</th>
+                        <th>Test Samples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if metrics %}
+                        {% for model_name, m in metrics.items() %}
+                            <tr>
+                                <td><strong>{{ model_name }}</strong></td>
+                                <td>{{ (m.accuracy * 100) | round(2) }}%</td>
+                                <td>{{ (m.precision * 100) | round(2) }}%</td>
+                                <td>{{ (m.recall * 100) | round(2) }}%</td>
+                                <td>{{ (m.f1_score * 100) | round(2) }}%</td>
+                                <td>{{ m.test_samples | default(3200) }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">No metrics available. Please run model training.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Embed Real Metrics Data for Chart.js -->
+<script id="dashboardMetricsJson" type="application/json">
+{{ metrics | tojson }}
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initTwoColorDashboardChart();
+    });
+</script>
+{% endblock %}

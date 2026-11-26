@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered Fake News Detection{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-illustration">
+            <svg class="hero-svg" viewBox="0 0 24 24">
+                <path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"></path>
+                <path d="M16 11v1a4 4 0 0 1-8 0v-1"></path>
+                <path d="M12 16v6"></path>
+                <path d="M8 22h8"></path>
+                <circle cx="9" cy="6" r="1" fill="#14213D"></circle>
+                <circle cx="15" cy="6" r="1" fill="#14213D"></circle>
+            </svg>
+        </div>
+        <h1 class="hero-title">AI-Powered Fake News Detection</h1>
+        <p class="hero-subtitle">
+            Analyze news articles using Machine Learning algorithms to identify patterns associated with real and fake news.
+        </p>
+    </section>
+
+    <!-- News Input Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>News Article Analysis</span>
+            </div>
+            <div class="text-counter" id="charCounter">0 characters | 0 words</div>
+        </div>
+
+        <form id="newsForm" method="POST" action="{{ url_for('predict') }}">
+            <div class="form-group">
+                <textarea 
+                    name="news_text" 
+                    id="newsInput" 
+                    rows="7" 
+                    class="form-control" 
+                    placeholder="Paste your news article here to analyze..."
+                    required>{% if input_text %}{{ input_text }}{% endif %}</textarea>
+            </div>
+
+            <!-- Sample News Buttons -->
+            <div class="samples-wrapper">
+                <span class="samples-label">
+                    <i class="fa-solid fa-flask"></i> Demonstration Samples:
+                </span>
+                <div class="samples-actions">
+                    <button type="button" class="sample-btn" id="btnSampleReal" onclick="loadRealSample()">
+                        <i class="fa-solid fa-check"></i> Load Sample Real News
+                    </button>
+                    <button type="button" class="sample-btn" id="btnSampleFake" onclick="loadFakeSample()">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Load Sample Fake News
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" id="clearBtn" class="btn btn-outline">
+                    <i class="fa-solid fa-xmark"></i> Clear
+                </button>
+                <button type="submit" id="analyzeBtn" class="btn btn-primary">
+                    <span class="btn-spinner" id="analyzeSpinner"></span>
+                    <i class="fa-solid fa-magnifying-glass" id="analyzeIcon"></i>
+                    <span id="analyzeBtnText">Analyze News</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Prediction Results Section (Hidden until analyzed or dynamically rendered) -->
+    <div id="resultSection" class="results-container {% if prediction_result %}visible{% endif %}">
+        {% if prediction_result %}
+            {% set res = prediction_result %}
+            {% set outcome = res.final_prediction %}
+            <div class="card result-card">
+                <div class="result-header">
+                    <div class="result-badge-wrap">
+                        <span class="result-badge {% if outcome == 'REAL' %}badge-real{% elif outcome == 'FAKE' %}badge-fake{% else %}badge-uncertain{% endif %}">
+                            {% if outcome == 'REAL' %}
+                                <i class="fa-solid fa-check"></i> REAL NEWS
+                            {% elif outcome == 'FAKE' %}
+                                <i class="fa-solid fa-triangle-exclamation"></i> FAKE NEWS
+                            {% else %}
+                                <i class="fa-solid fa-circle-question"></i> UNCERTAIN
+                            {% endif %}
+                        </span>
+                        <span class="voting-summary">
+                            <i class="fa-solid fa-check-double"></i> {{ res.vote_tally }}
+                        </span>
+                    </div>
+                    <div class="duration-badge">
+                        <i class="fa-solid fa-stopwatch"></i> {{ res.duration_ms }} ms
+                    </div>
+                </div>
+
+                <!-- Model-wise Breakdown Cards (2 Models) -->
+                <div class="models-grid">
+                    <!-- Logistic Regression -->
+                    <div class="model-item">
+                        <div class="model-item-top">
+                            <span class="model-name">Logistic Regression</span>
+                            <span class="badge-mini {% if res.models.logistic_regression.prediction == 'REAL' %}mini-real{% else %}mini-fake{% endif %}">
+                                {{ res.models.logistic_regression.prediction }}
+                            </span>
+                        </div>
+                        <div class="confidence-bar-wrap">
+                            <div class="confidence-labels">
+                                <span>Confidence</span>
+                                <strong>{{ res.models.logistic_regression.confidence }}%</strong>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: {{ res.models.logistic_regression.confidence }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Multinomial Naive Bayes -->
+                    <div class="model-item">
+                        <div class="model-item-top">
+                            <span class="model-name">Multinomial Naive Bayes</span>
+                            <span class="badge-mini {% if res.models.naive_bayes.prediction == 'REAL' %}mini-real{% else %}mini-fake{% endif %}">
+                                {{ res.models.naive_bayes.prediction }}
+                            </span>
+                        </div>
+                        <div class="confidence-bar-wrap">
+                            <div class="confidence-labels">
+                                <span>Confidence</span>
+                                <strong>{{ res.models.naive_bayes.confidence }}%</strong>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: {{ res.models.naive_bayes.confidence }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="disclaimer-banner">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span><strong>Disclaimer:</strong> {{ res.disclaimer }}</span>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- About Section -->
+    <section class="card about-card" id="about" style="margin-top: 2rem;">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>About this System</span>
+            </div>
+        </div>
+        <div class="about-content">
+            <p>
+                This AI-Based Fake News Detection System uses Natural Language Processing, TF-IDF feature extraction, and Machine Learning algorithms including Logistic Regression and Multinomial Naive Bayes to analyze news text.
+            </p>
+        </div>
+    </section>
+</div>
+{% endblock %}

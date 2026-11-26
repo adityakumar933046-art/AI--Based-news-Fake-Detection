@@ -1,33 +1,36 @@
-
-# Environment variables and secrets
-.env
-.env.*
-!.env.example
-
-# Python cache
+# Python Bytecode & Cache
 __pycache__/
 *.py[cod]
 *$py.class
+*.pytest_cache/
 
-# Django local database
-db.sqlite3
-db.sqlite3-journal
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
 
-# Local environment
+# Environment Variables & Secrets
 .env
 .env.*
 !.env.example
 
-# Local backups
+# SQLite Database (Keep directory via .gitkeep)
+database/*.db
+db.sqlite3
+db.sqlite3-journal
+!database/.gitkeep
+
+# Large Datasets (CSVs exceed GitHub limits; see README instructions)
+dataset/*.csv
+!dataset/.gitkeep
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
 *.backup
 *.bak
-
-# Large datasets (download and prepare locally)
-dataset/*.csv
-
-# Jupyter checkpoint files
 .ipynb_checkpoints/
-
-# Virtual environments
-venv/
-.venv/
