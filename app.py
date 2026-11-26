@@ -70,12 +70,6 @@ def home():
     return render_template('index.html', samples=SAMPLE_NEWS)
 
 
-@app.route('/about')
-def about():
-    """About page route describing the AI system architecture and technologies."""
-    return render_template('about.html')
-
-
 @app.route('/predict', methods=['POST'])
 def predict():
     """

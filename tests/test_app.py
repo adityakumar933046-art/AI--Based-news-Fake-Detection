@@ -113,11 +113,6 @@ class TestFakeNewsDetectionSystem(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"AI-Powered Fake News Detection", response.data)
 
-        # About page
-        response = self.client.get('/about')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"About the Project", response.data)
-
         # Dashboard page
         response = self.client.get('/dashboard')
         self.assertEqual(response.status_code, 200)

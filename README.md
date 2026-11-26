@@ -109,8 +109,7 @@ AI-FAKE-NEWS-DETECTION/
 │   ├── base.html               # Shared layout, navigation, and footer
 │   ├── index.html              # Home page: news input, test samples, result card
 │   ├── dashboard.html          # Dynamic dashboard with Chart.js and KPI widgets
-│   ├── history.html            # Query history with search, filter, and clear modal
-│   └── about.html              # System overview and technology stack
+│   └── history.html            # Query history with search, filter, and clear modal
 │
 ├── static/                     # Web assets (Strict Two-Color Theme: #14213D & #FFFFFF)
 │   ├── css/
